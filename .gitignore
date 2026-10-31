@@ -1,0 +1,26 @@
+# Datos (no se versionan; se descargan con el script en la fuente primaria)
+data/*
+!data/.gitkeep
+
+# Checkpoints y pesos de modelos
+*.pt
+*.pth
+*.h5
+*.keras
+*.onnx
+*.tflite
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+env/
+
+# Comprimidos y temporales
+*.zip
+*.tmp
+
+# Sistema
+.DS_Store
+Thumbs.db
