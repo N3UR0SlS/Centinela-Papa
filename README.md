@@ -53,4 +53,4 @@ centinela-papa/
 
 ## Clave de alineación (resuelta)
 
-La revisión del EXIF (`notebooks/revisar_exif.py`) mostró que las fotos traen fecha pero no GPS confiable, así que la clave es (Mbeya, día): cada foto fechada se cruza con el clima diario de NASA POWER. Las 10 filas del Anexo A se generaron con `notebooks/acoplar_anexo_a.py` y están en `propuesta/anexo_a.csv`.
+La revisión del EXIF (`notebooks/revisar_exif.py`) mostró que todas las fotos traen fecha y cerca de un tercio trae GPS, así que la clave es (Mbeya, día): cada foto se cruza con el clima diario de NASA POWER. Ojo: la mitad de las entradas de cada zip son archivos `__MACOSX` que no son imágenes, y las clases se fotografiaron en semanas distintas (posible atajo por fecha, medido en el cuaderno de la Fase 1). Las 10 filas del Anexo A se generaron con `notebooks/acoplar_anexo_a.py` y están en `propuesta/anexo_a.csv`.

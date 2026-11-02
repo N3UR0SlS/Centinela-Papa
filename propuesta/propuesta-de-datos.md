@@ -34,11 +34,11 @@ En la Fase 1 aplanamos la imagen a tabla (promedios por canal R, G, B y algún d
 
 Partición por grupo: como hay muchas fotos de las mismas fincas y fechas, la partición se hace por grupo (finca o fecha), no por foto, para que no queden casi duplicados repartidos entre entrenamiento y prueba (por ejemplo GroupShuffleSplit o StratifiedGroupKFold). Partir por foto inflaría el desempeño de forma engañosa.
 
-Clave de alineación: corregimos un dato de la versión anterior. La ficha de Zenodo indica que todas las fotos se tomaron en la región de Mbeya (no en cuatro regiones), entre el 22 de noviembre de 2022 y el 8 de abril de 2023. Revisamos el EXIF de una muestra de 40 fotos (de earlyblt.zip) con el script `notebooks/revisar_exif.py`: 19 traen fecha (DateTimeOriginal) y solo 1 trae GPS; las fechas de esa muestra caen en febrero de 2023 (rango 2023-02-02 a 2023-02-15).
+Clave de alineación: corregimos un dato de la versión anterior. La ficha de Zenodo indica que todas las fotos se tomaron en la región de Mbeya (no en cuatro regiones), entre el 22 de noviembre de 2022 y el 8 de abril de 2023. Revisamos el EXIF con el script `notebooks/revisar_exif.py`, sobre una muestra de 40 fotos de cada zip. Un primer conteo daba "19 de 40 con fecha y 1 con GPS", pero estaba mal: la mitad de las entradas `.jpg` de cada zip son archivos `__MACOSX/._*.jpg` que no son imágenes (20.438 de 40.876 en healthy, 17.772 de 35.544 en earlyblt, 20.499 de 40.998 en lateblt) y el script los contaba como fotos sin fecha. Filtrados esos archivos, el resultado sobre fotos reales es: 120 de 120 traen fecha (DateTimeOriginal) y 35 de 120 traen GPS (sana 21/40, temprano 5/40, tardío 9/40).
 
-Conclusión: hay fecha (en cerca de la mitad de las fotos) pero no GPS confiable. Por eso la clave es por muestra a nivel (Mbeya, día): se acopla cada foto que trae fecha con el clima diario de NASA POWER de Mbeya ese día. Es un acoplamiento real y con muchas más filas distintas que el nivel de mes.
+Conclusión: todas las fotos traen fecha, así que la clave es por muestra a nivel (Mbeya, día): cada foto se acopla con el clima diario de NASA POWER de Mbeya ese día. Para el tercio de fotos con GPS, en la Fase 2 se puede afinar a (celda de NASA POWER, día), generalizando las coordenadas a la celda de unos 50 km, lo que no pierde información del clima y protege la ubicación de la finca.
 
-Matices honestos: cerca de la mitad de las fotos no trae fecha, así que esas no se acoplan por día (se trabajan a nivel de mes o se excluyen del subconjunto acoplado). Como el GPS está prácticamente ausente, no se recupera la ubicación de la finca (bien para la privacidad) y no aplica el acoplamiento fino por celda. La ventana total del conjunto es nov 2022 a abr 2023; las 10 filas del anexo A ya se generaron recorriendo los tres zips y cruzando cada fecha con el clima diario de NASA POWER.
+Limitación importante (atajo por fecha): las clases se fotografiaron en semanas distintas. En la muestra, las sanas son de enero (7 al 30), las de tizón temprano de febrero (2 al 23) y las de tizón tardío del 27 de enero al 23 de febrero. Eso significa que la fecha, y por lo tanto el clima del día, puede "predecir" la clase solo por la semana de la toma y no por la biología. Lo medimos en la Fase 1 (AUC de la fecha sola como predictor) y en la Fase 2 la ablación de la rama climática se hará en los días donde se fotografiaron las dos clases. La proporción de fotos con GPS también cambia por clase, señal de que se usaron celulares o configuraciones distintas; también se mide como posible atajo. La ventana total del conjunto es nov 2022 a abr 2023; las 10 filas del anexo A se generaron recorriendo los tres zips y cruzando cada fecha con el clima diario de NASA POWER.
 
 ## 6. Línea base
 
@@ -51,7 +51,8 @@ La clase mayoritaria es "enferma" (alrededor del 65%), así que esa línea base 
 | El conjunto es de una variedad (Shangi) y una región (Mbeya) | El modelo puede no servir en otra zona | avisar el límite, aumentar datos, recalibrar antes de usarlo en otro lado |
 | Falsa alarma | fumigar sin necesidad | umbral calibrado en validación |
 | Alarma omitida | perder el cultivo | priorizar el recall de "enferma" |
-| GPS en el EXIF (raro: 1 de 40 en la muestra) | podría exponer la ubicación de una finca | borrar el EXIF igual, por precaución, antes de subir nada |
+| GPS en el EXIF (35 de 120 fotos de la muestra) | expone la ubicación de la finca | guardar solo sí/no, borrar el EXIF antes de subir imágenes, generalizar a la celda |
+| La clase depende de la fecha de la toma | el modelo (o el clima) aprende la semana y no la enfermedad | medir el AUC de la fecha sola; ablación de la Fase 2 en días con las dos clases |
 
 ## 8. Referencias
 
@@ -63,7 +64,7 @@ La clase mayoritaria es "enferma" (alrededor del 65%), así que esa línea base 
 
 ## Anexo A - Prueba de acoplamiento
 
-Clave: por muestra, (Mbeya, día). La fecha sale del EXIF de cada foto (DateTimeOriginal) y el clima diario de NASA POWER para el punto de Mbeya ese día. La revisión del EXIF (ver `notebooks/revisar_exif.py`) confirmó que hay fecha en cerca de la mitad de las fotos y que no hay GPS confiable, así que la granularidad es por día, no por celda.
+Clave: por muestra, (Mbeya, día). La fecha sale del EXIF de cada foto (DateTimeOriginal) y el clima diario de NASA POWER para el punto de Mbeya ese día. La revisión del EXIF (ver `notebooks/revisar_exif.py`) confirmó que todas las fotos traen fecha, así que la granularidad es por día; para el tercio con GPS se puede afinar por celda en la Fase 2.
 
 Las 10 filas se generaron con el script `notebooks/acoplar_anexo_a.py`, que recorre los tres zips (healthy, earlyblt, lateblt), saca la fecha del EXIF de cada foto y la cruza con el clima diario de Mbeya de NASA POWER. Son filas reales, no de ejemplo:
 
@@ -105,9 +106,9 @@ print(p["T2M"]["20230202"], p["RH2M"]["20230202"], p["PRECTOTCORR"]["20230202"])
 
 ### Fuente 1: Irish Potato Imagery Dataset (Zenodo, CC BY 4.0)
 
-Resultado: sin datos de personas (son hojas de papa). Un cuidado: el EXIF de las fotos de celular puede traer coordenadas, que son un identificador indirecto de la finca.
+Resultado: sin datos de personas (son hojas de papa). Un cuidado: cerca de un tercio de las fotos trae coordenadas GPS en el EXIF, que son un identificador indirecto de la finca.
 
-- A. Datos personales: no hay identificadores directos. La revisión del EXIF encontró GPS en solo 1 de 40 fotos, así que la ubicación de la finca prácticamente no se expone; aun así se borra el EXIF antes de subir nada a Colab, Drive o un asistente de IA.
+- A. Datos personales: no hay identificadores directos. La revisión del EXIF encontró GPS en 35 de 120 fotos de la muestra: es un identificador indirecto de la finca. Mitigación: el cuaderno solo guarda si la foto tiene GPS (sí/no), nunca las coordenadas; se borra el EXIF antes de subir cualquier imagen a Colab, Drive o un asistente de IA, y si se usa la ubicación para el clima se generaliza a la celda de NASA POWER.
 - B. Datos sensibles: no hay (salud humana, biométricos, etc.).
 - C. Menores: no aplica, no hay personas.
 - D. Base legal: fuente pública con DOI y licencia citable (CC BY 4.0); se cumple la atribución.
