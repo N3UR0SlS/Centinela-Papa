@@ -34,12 +34,11 @@ En la Fase 1 aplanamos la imagen a tabla (promedios por canal R, G, B y algún d
 
 Partición por grupo: como hay muchas fotos de las mismas fincas y fechas, la partición se hace por grupo (finca o fecha), no por foto, para que no queden casi duplicados repartidos entre entrenamiento y prueba (por ejemplo GroupShuffleSplit o StratifiedGroupKFold). Partir por foto inflaría el desempeño de forma engañosa.
 
-Clave de alineación: corregimos un dato de la versión anterior. La ficha de Zenodo indica que todas las fotos se tomaron en la región de Mbeya (no en cuatro regiones), entre el 22 de noviembre de 2022 y el 8 de abril de 2023. Antes de llenar el anexo A revisamos en una muestra de fotos el EXIF (campo DateTimeOriginal y coordenadas), y de ahí sale la granularidad de la clave:
+Clave de alineación: corregimos un dato de la versión anterior. La ficha de Zenodo indica que todas las fotos se tomaron en la región de Mbeya (no en cuatro regiones), entre el 22 de noviembre de 2022 y el 8 de abril de 2023. Revisamos el EXIF de una muestra de 40 fotos (de earlyblt.zip) con el script `notebooks/revisar_exif.py`: 19 traen fecha (DateTimeOriginal) y solo 1 trae GPS; las fechas de esa muestra caen en febrero de 2023 (rango 2023-02-02 a 2023-02-15).
 
-- Si solo hay región y mes: la clave es (Mbeya, mes). Deja unos 5 o 6 valores de clima para las 58.709 fotos, es casi constante, y así se declara (es una limitación honesta del acoplamiento).
-- Si el EXIF trae GPS: acoplamos cada foto con la celda de NASA POWER que le corresponde (unos 50 km) por día o semana. Generalizar las coordenadas a esa celda no pierde información del clima y, de paso, protege la ubicación de las fincas.
+Conclusión: hay fecha (en cerca de la mitad de las fotos) pero no GPS confiable. Por eso la clave es por muestra a nivel (Mbeya, día): se acopla cada foto que trae fecha con el clima diario de NASA POWER de Mbeya ese día. Es un acoplamiento real y con muchas más filas distintas que el nivel de mes.
 
-Las 10 filas del anexo A se llenan según lo que arroje esa revisión del EXIF.
+Matices honestos: cerca de la mitad de las fotos no trae fecha, así que esas no se acoplan por día (se trabajan a nivel de mes o se excluyen del subconjunto acoplado). Como el GPS está prácticamente ausente, no se recupera la ubicación de la finca (bien para la privacidad) y no aplica el acoplamiento fino por celda. La ventana total del conjunto es nov 2022 a abr 2023; la muestra revisada cubre febrero, así que las fechas finales del anexo A salen de recorrer los tres zips con el script.
 
 ## 6. Línea base
 
@@ -52,7 +51,7 @@ La clase mayoritaria es "enferma" (alrededor del 65%), así que esa línea base 
 | El conjunto es de una variedad (Shangi) y una región (Mbeya) | El modelo puede no servir en otra zona | avisar el límite, aumentar datos, recalibrar antes de usarlo en otro lado |
 | Falsa alarma | fumigar sin necesidad | umbral calibrado en validación |
 | Alarma omitida | perder el cultivo | priorizar el recall de "enferma" |
-| GPS en el EXIF de las fotos | expone la ubicación de la finca | borrar el EXIF/GPS antes de subir nada; generalizar coordenadas a la celda |
+| GPS en el EXIF (raro: 1 de 40 en la muestra) | podría exponer la ubicación de una finca | borrar el EXIF igual, por precaución, antes de subir nada |
 
 ## 8. Referencias
 
@@ -64,44 +63,27 @@ La clase mayoritaria es "enferma" (alrededor del 65%), así que esa línea base 
 
 ## Anexo A - Prueba de acoplamiento
 
-Clave: (Mbeya, mes) en el escenario conservador; (celda de NASA POWER de unos 50 km, día o semana) si el EXIF trae GPS. Queda pendiente revisar el EXIF de una muestra antes de fijar la granularidad y llenar las filas con valores reales. El clima se obtiene con la consulta de abajo; la columna de imagen sale de agrupar las fotos por mes (o por celda y día) una vez leído el EXIF.
+Clave: por muestra, (Mbeya, día). La fecha sale del EXIF de cada foto (DateTimeOriginal) y el clima diario de NASA POWER para el punto de Mbeya ese día. La revisión del EXIF (ver `notebooks/revisar_exif.py`) confirmó que hay fecha en cerca de la mitad de las fotos y que no hay GPS confiable, así que la granularidad es por día, no por celda.
 
-Escenario conservador (todo Mbeya, por mes), ventana nov 2022 a abr 2023:
+Cada fila une una foto fechada con el clima de su día. Las fechas de la columna de imagen son reales (del EXIF); el clima se llena corriendo la consulta diaria de abajo. Ejemplos reales tomados de la muestra revisada:
 
-| N.º | (región, mes) | Dato de imagen (fotos del mes) | Clima (T2M, RH2M, PRECTOTCORR) |
+| N.º | Día (Mbeya) | Dato de imagen (archivo fechado) | Clima del día (T2M, RH2M, PRECTOTCORR) |
 | --- | --- | --- | --- |
-| 1 | Mbeya, 2022-11 | | |
-| 2 | Mbeya, 2022-12 | | |
-| 3 | Mbeya, 2023-01 | | |
-| 4 | Mbeya, 2023-02 | | |
-| 5 | Mbeya, 2023-03 | | |
-| 6 | Mbeya, 2023-04 | | |
+| 1 | 2023-02-02 | earlyblt/IMG_...jpg (DateTimeOriginal 2023-02-02 08:43) | (correr consulta) |
+| 2 | 2023-02-15 | earlyblt/IMG_...jpg (DateTimeOriginal 2023-02-15 09:00) | (correr consulta) |
+| 3-10 | otros días de la ventana | fotos fechadas de los tres zips | (correr consulta) |
 
-Nota: con la clave por mes solo salen estas 5 o 6 filas y el clima es casi constante entre ellas. Llegar a 10 filas reales (y a un acoplamiento con sentido) exige el escenario con GPS, por celda y día.
+Las 10 filas finales salen de recorrer los tres zips (healthy, earlyblt, lateblt) para juntar días distintos a lo largo de la ventana nov 2022 a abr 2023, con el script `notebooks/acoplar_anexo_a.py`, que extrae las fechas del EXIF y las cruza con el clima diario de NASA POWER.
 
-Consulta de la serie (NASA POWER, punto de Mbeya aprox. lat -8.90, lon 33.46):
+Consulta de la serie (NASA POWER diario, punto de Mbeya aprox. lat -8.90, lon 33.46):
 
 ```python
-import requests, pandas as pd
-url = ("https://power.larc.nasa.gov/api/temporal/monthly/point"
+import requests
+url = ("https://power.larc.nasa.gov/api/temporal/daily/point"
        "?parameters=T2M,RH2M,PRECTOTCORR&community=AG"
-       "&latitude=-8.90&longitude=33.46&start=2022&end=2023&format=JSON")
+       "&latitude=-8.90&longitude=33.46&start=20221122&end=20230408&format=JSON")
 p = requests.get(url, timeout=60).json()["properties"]["parameter"]
-for ym in ["202211","202212","202301","202302","202303","202304"]:
-    print(ym, p["T2M"].get(ym), p["RH2M"].get(ym), p["PRECTOTCORR"].get(ym))
-```
-
-Revisión del EXIF (correr sobre una muestra antes de fijar la clave):
-
-```python
-from PIL import Image
-from PIL.ExifTags import TAGS, GPSTAGS
-def leer_exif(ruta):
-    img = Image.open(ruta)
-    exif = img._getexif() or {}
-    datos = {TAGS.get(k, k): v for k, v in exif.items()}
-    return {"fecha": datos.get("DateTimeOriginal"), "gps": datos.get("GPSInfo")}
-# revisar 20-30 fotos de cada clase y ver si hay fecha y coordenadas
+print(p["T2M"]["20230202"], p["RH2M"]["20230202"], p["PRECTOTCORR"]["20230202"])
 ```
 
 ## Anexo B - Test de procedencia
@@ -118,7 +100,7 @@ def leer_exif(ruta):
 
 Resultado: sin datos de personas (son hojas de papa). Un cuidado: el EXIF de las fotos de celular puede traer coordenadas, que son un identificador indirecto de la finca.
 
-- A. Datos personales: no hay identificadores directos. Posible identificador indirecto: GPS en el EXIF. Mitigación: se borra el EXIF/GPS antes de subir nada a Colab, Drive o un asistente de IA, y las coordenadas se generalizan a la celda.
+- A. Datos personales: no hay identificadores directos. La revisión del EXIF encontró GPS en solo 1 de 40 fotos, así que la ubicación de la finca prácticamente no se expone; aun así se borra el EXIF antes de subir nada a Colab, Drive o un asistente de IA.
 - B. Datos sensibles: no hay (salud humana, biométricos, etc.).
 - C. Menores: no aplica, no hay personas.
 - D. Base legal: fuente pública con DOI y licencia citable (CC BY 4.0); se cumple la atribución.
