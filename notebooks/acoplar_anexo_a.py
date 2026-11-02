@@ -21,6 +21,12 @@ ZIPS = {
 LAT, LON = -8.90, 33.46   # Mbeya
 N_FILAS = 10
 
+
+def es_imagen_real(n):
+    base = n.split("/")[-1]
+    return (n.lower().endswith((".jpg", ".jpeg", ".png"))
+            and "__MACOSX" not in n and not base.startswith("._"))
+
 # 1. Un archivo de ejemplo por cada dia con fecha EXIF
 por_dia = {}
 for clase, ruta in ZIPS.items():
@@ -30,7 +36,7 @@ for clase, ruta in ZIPS.items():
         print("No encontre:", ruta)
         continue
     for n in z.namelist():
-        if not n.lower().endswith((".jpg", ".jpeg", ".png")):
+        if not es_imagen_real(n):
             continue
         try:
             exif = Image.open(io.BytesIO(z.read(n)))._getexif() or {}

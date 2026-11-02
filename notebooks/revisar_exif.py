@@ -17,8 +17,16 @@ from PIL.ExifTags import TAGS
 ZIP = r"C:\Users\ASUS\Downloads\earlyblt.zip"   # <-- cambia por tu ruta
 N = 40                                           # cuantas fotos revisar
 
+
+def es_imagen_real(n):
+    base = n.split("/")[-1]
+    return (n.lower().endswith((".jpg", ".jpeg", ".png"))
+            and "__MACOSX" not in n and not base.startswith("._"))
+
 z = zipfile.ZipFile(ZIP)
-nombres = [n for n in z.namelist() if n.lower().endswith((".jpg", ".jpeg", ".png"))]
+todos = [n for n in z.namelist() if n.lower().endswith((".jpg", ".jpeg", ".png"))]
+nombres = [n for n in todos if es_imagen_real(n)]
+print(f"Entradas .jpg en el zip: {len(todos)} | archivos que NO son imagen (__MACOSX/._): {len(todos) - len(nombres)} | fotos reales: {len(nombres)}")
 random.seed(0)
 muestra = random.sample(nombres, min(N, len(nombres)))
 
@@ -27,7 +35,8 @@ for n in muestra:
     try:
         img = Image.open(io.BytesIO(z.read(n)))
         exif = img._getexif() or {}
-    except Exception:
+    except Exception as e:
+        print("No se pudo abrir:", n, type(e).__name__)
         exif = {}
     tags = {TAGS.get(k, k): v for k, v in exif.items()}
     if tags.get("DateTimeOriginal"):
