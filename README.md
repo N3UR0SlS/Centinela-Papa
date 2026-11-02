@@ -51,6 +51,6 @@ centinela-papa/
 - En la etapa siguiente se incluirá un script que descarga las imágenes desde Zenodo y la serie climática desde la API de NASA POWER, para que el cuaderno corra de principio a fin.
 - El repositorio es privado y compartido con el docente (o público con el script de descarga y sin datos personales), según la regla de entrega de la rúbrica.
 
-## Pendiente antes de cerrar el Anexo A
+## Clave de alineación (resuelta)
 
-Revisar el EXIF de una muestra de fotos (campo DateTimeOriginal y coordenadas). Si solo hay región y mes, la clave de alineación es (Mbeya, mes) y es casi constante; si hay GPS, se acopla cada foto con la celda de NASA POWER (unos 50 km) por día, lo que además protege la ubicación de las fincas.
+La revisión del EXIF (`notebooks/revisar_exif.py`) mostró que las fotos traen fecha pero no GPS confiable, así que la clave es (Mbeya, día): cada foto fechada se cruza con el clima diario de NASA POWER. Las 10 filas del Anexo A se generaron con `notebooks/acoplar_anexo_a.py` y están en `propuesta/anexo_a.csv`.

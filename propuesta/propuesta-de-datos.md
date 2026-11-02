@@ -38,7 +38,7 @@ Clave de alineación: corregimos un dato de la versión anterior. La ficha de Ze
 
 Conclusión: hay fecha (en cerca de la mitad de las fotos) pero no GPS confiable. Por eso la clave es por muestra a nivel (Mbeya, día): se acopla cada foto que trae fecha con el clima diario de NASA POWER de Mbeya ese día. Es un acoplamiento real y con muchas más filas distintas que el nivel de mes.
 
-Matices honestos: cerca de la mitad de las fotos no trae fecha, así que esas no se acoplan por día (se trabajan a nivel de mes o se excluyen del subconjunto acoplado). Como el GPS está prácticamente ausente, no se recupera la ubicación de la finca (bien para la privacidad) y no aplica el acoplamiento fino por celda. La ventana total del conjunto es nov 2022 a abr 2023; la muestra revisada cubre febrero, así que las fechas finales del anexo A salen de recorrer los tres zips con el script.
+Matices honestos: cerca de la mitad de las fotos no trae fecha, así que esas no se acoplan por día (se trabajan a nivel de mes o se excluyen del subconjunto acoplado). Como el GPS está prácticamente ausente, no se recupera la ubicación de la finca (bien para la privacidad) y no aplica el acoplamiento fino por celda. La ventana total del conjunto es nov 2022 a abr 2023; las 10 filas del anexo A ya se generaron recorriendo los tres zips y cruzando cada fecha con el clima diario de NASA POWER.
 
 ## 6. Línea base
 
@@ -65,15 +65,22 @@ La clase mayoritaria es "enferma" (alrededor del 65%), así que esa línea base 
 
 Clave: por muestra, (Mbeya, día). La fecha sale del EXIF de cada foto (DateTimeOriginal) y el clima diario de NASA POWER para el punto de Mbeya ese día. La revisión del EXIF (ver `notebooks/revisar_exif.py`) confirmó que hay fecha en cerca de la mitad de las fotos y que no hay GPS confiable, así que la granularidad es por día, no por celda.
 
-Cada fila une una foto fechada con el clima de su día. Las fechas de la columna de imagen son reales (del EXIF); el clima se llena corriendo la consulta diaria de abajo. Ejemplos reales tomados de la muestra revisada:
+Las 10 filas se generaron con el script `notebooks/acoplar_anexo_a.py`, que recorre los tres zips (healthy, earlyblt, lateblt), saca la fecha del EXIF de cada foto y la cruza con el clima diario de Mbeya de NASA POWER. Son filas reales, no de ejemplo:
 
-| N.º | Día (Mbeya) | Dato de imagen (archivo fechado) | Clima del día (T2M, RH2M, PRECTOTCORR) |
-| --- | --- | --- | --- |
-| 1 | 2023-02-02 | earlyblt/IMG_...jpg (DateTimeOriginal 2023-02-02 08:43) | (correr consulta) |
-| 2 | 2023-02-15 | earlyblt/IMG_...jpg (DateTimeOriginal 2023-02-15 09:00) | (correr consulta) |
-| 3-10 | otros días de la ventana | fotos fechadas de los tres zips | (correr consulta) |
+| N.º | Día (Mbeya) | Foto (archivo fechado) | T2M (°C) | RH2M (%) | Precip. (mm) |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 2022-11-22 | sana/healthy722.jpg | 18.37 | 82.63 | 14.07 |
+| 2 | 2023-01-08 | sana/healthy1548.jpg | 17.23 | 85.79 | 55.13 |
+| 3 | 2023-01-12 | sana/healthy9869.jpg | 17.36 | 85.16 | 29.88 |
+| 4 | 2023-01-15 | sana/healthy5935.jpg | 16.56 | 91.05 | 43.57 |
+| 5 | 2023-01-21 | sana/healthy14418.jpg | 16.49 | 88.20 | 2.82 |
+| 6 | 2023-01-27 | sana/healthy20431.jpg | 17.51 | 83.26 | 10.57 |
+| 7 | 2023-02-07 | tardio/lateblt3437.jpg | 17.38 | 86.34 | 3.81 |
+| 8 | 2023-02-14 | temprano/earlyblt12260.jpg | 17.39 | 90.36 | 5.58 |
+| 9 | 2023-02-20 | temprano/earlyblt12133.jpg | 18.33 | 83.91 | 1.19 |
+| 10 | 2023-02-24 | temprano/earlyblt2191.jpg | 18.15 | 86.59 | 9.94 |
 
-Las 10 filas finales salen de recorrer los tres zips (healthy, earlyblt, lateblt) para juntar días distintos a lo largo de la ventana nov 2022 a abr 2023, con el script `notebooks/acoplar_anexo_a.py`, que extrae las fechas del EXIF y las cruza con el clima diario de NASA POWER.
+Las fechas cubren de noviembre 2022 a febrero 2023, con humedad relativa alta (82 a 91%), que es justo la condición que favorece el tizón. El CSV completo está en `propuesta/anexo_a.csv`.
 
 Consulta de la serie (NASA POWER diario, punto de Mbeya aprox. lat -8.90, lon 33.46):
 
