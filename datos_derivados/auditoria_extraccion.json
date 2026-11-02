@@ -1,0 +1,23 @@
+{
+ "sana": {
+  "entradas_jpg": 40876,
+  "basura_no_imagen": 20438,
+  "intentadas": 1500,
+  "ok": 1500,
+  "errores": {}
+ },
+ "temprano": {
+  "entradas_jpg": 35544,
+  "basura_no_imagen": 17772,
+  "intentadas": 1500,
+  "ok": 1500,
+  "errores": {}
+ },
+ "tardio": {
+  "entradas_jpg": 40998,
+  "basura_no_imagen": 20499,
+  "intentadas": 1500,
+  "ok": 1500,
+  "errores": {}
+ }
+}
