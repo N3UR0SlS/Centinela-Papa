@@ -2,22 +2,24 @@
  "sana": {
   "entradas_jpg": 40876,
   "basura_no_imagen": 20438,
-  "intentadas": 1500,
-  "ok": 1500,
+  "intentadas": 20438,
+  "ok": 20438,
   "errores": {}
  },
  "temprano": {
   "entradas_jpg": 35544,
   "basura_no_imagen": 17772,
-  "intentadas": 1500,
-  "ok": 1500,
-  "errores": {}
+  "intentadas": 17772,
+  "ok": 17770,
+  "errores": {
+   "UnidentifiedImageError": 2
+  }
  },
  "tardio": {
   "entradas_jpg": 40998,
   "basura_no_imagen": 20499,
-  "intentadas": 1500,
-  "ok": 1500,
+  "intentadas": 20499,
+  "ok": 20499,
   "errores": {}
  }
 }
