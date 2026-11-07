@@ -42,7 +42,7 @@ def bajar_anio(lat, lon, anio, intentos=4):
 
 
 def resumir_dia(h):
-    h = h.replace(-999, pd.NA).astype(float)
+    h = h.astype(float).mask(lambda x: x <= -998)   # -999 = faltante en POWER
     d = pd.DataFrame({
         "t_media": h["T2M"].resample("D").mean(),
         "t_min": h["T2M"].resample("D").min(),
