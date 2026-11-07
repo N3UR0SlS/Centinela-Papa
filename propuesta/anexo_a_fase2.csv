@@ -1,0 +1,11 @@
+n,foto,clase,fecha,celda,origen_celda,tmin_media_14d,horas_hr90_media_14d,lluvia_14d_mm,dias_hutton_14d
+1,sana/sana_014410.jpg,sana,2023-01-08,-9.000/33.750,dominante,13.3,13.9,304,14
+2,sana/sana_005054.jpg,sana,2023-01-12,-9.000/33.750,dominante,13.2,13.6,197,14
+3,sana/sana_004677.jpg,sana,2023-01-12,-9.000/33.125,GPS,15.1,10.9,184,14
+4,sana/sana_009229.jpg,sana,2023-01-23,-9.000/33.750,dominante,13.6,14.6,238,14
+5,tardio/tardio_046022.jpg,tardio,2023-01-27,-9.000/33.750,GPS,13.7,14.1,184,14
+6,sana/sana_007325.jpg,sana,2023-01-30,-9.000/33.750,dominante,13.6,13.9,93,14
+7,tardio/tardio_042240.jpg,tardio,2023-01-30,-9.000/33.125,GPS,15.6,11.0,62,13
+8,tardio/tardio_057122.jpg,tardio,2023-02-02,-9.000/33.750,dominante,13.5,13.7,131,14
+9,temprano/temprano_037763.jpg,temprano,2023-02-15,-9.000/33.750,dominante,13.8,15.1,193,14
+10,tardio/tardio_041720.jpg,tardio,2023-02-23,-9.000/33.750,dominante,13.7,14.9,110,14
